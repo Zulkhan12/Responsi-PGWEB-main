@@ -1,0 +1,30 @@
+/* Carousel */
+.carousel .reel {
+    display: flex;
+    overflow: hidden;
+    gap: 20px;
+  }
+  
+  .carousel .reel article {
+    width: 300px;
+    text-align: center;
+  }
+  
+  .carousel .image img {
+    width: 100%;
+    height: 208px;
+    object-fit: cover; /* Menjaga proporsi gambar tetap sesuai kotak */
+    border-radius: 8px; /* Memberikan sudut melengkung pada gambar */
+  }
+  
+  .carousel header h3 a {
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .carousel p {
+    font-size: 0.9rem;
+    color: #555;
+  }
+  

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAPS</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        #map {
+            height: 100vh;
+            margin: 0;
+        }
+        .legend {
+            background: white;
+            line-height: 1.5;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+        .legend i {
+            width: 20px;
+            height: 10px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Inisialisasi peta
+        const map = L.map('map').setView([-7.8, 110.2], 12);
+
+        // Tambahkan layer peta dasar
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Fungsi untuk memuat dan menambahkan GeoJSON
+        function addGeoJSONLayer(url, style, popupField, layerName) {
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const layer = L.geoJSON(data, {
+                        style: style,
+                        onEachFeature: function (feature, layer) {
+                            if (feature.properties && feature.properties[popupField]) {
+                                layer.bindPopup(`<strong>${layerName}:</strong> ${feature.properties[popupField]}`);
+                            }
+                        }
+                    });
+                    layer.addTo(map);
+                })
+                .catch(error => console.error(`Error loading ${url}:`, error));
+        }
+
+        // Tambahkan GeoJSON jalan
+        addGeoJSONLayer(
+            'data_KP/jalan.geojson', 
+            { color: 'blue', weight: 2 }, 
+            'REMARK', 
+            'Jalan'
+        );
+
+        // Tambahkan GeoJSON batas administratif garis
+        addGeoJSONLayer(
+            'data_KP/admin_ln.geojson', 
+            { color: 'red', weight: 2, dashArray: '5,5' }, 
+            'REMARK', 
+            'Batas Administratif Garis'
+        );
+
+        // Tambahkan GeoJSON batas administratif area
+        addGeoJSONLayer(
+            'data_KP/admin_ar.geojson', 
+            { color: 'green', weight: 1, fillOpacity: 0.4 }, 
+            'REMARK', 
+            'Batas Administratif Area'
+        );
+
+        // Tambahkan legenda
+        const legend = L.control({ position: 'bottomleft' });
+
+        legend.onAdd = function () {
+            const div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <i style="background: blue"></i> Jalan<br>
+                <i style="background: red; border: 1px solid black; border-style: dashed"></i> Batas Administratif Garis<br>
+                <i style="background: green; opacity: 0.4"></i> Batas Administratif Area
+            `;
+            return div;
+        };
+
+        legend.addTo(map);
+    </script>
+</body>
+</html>

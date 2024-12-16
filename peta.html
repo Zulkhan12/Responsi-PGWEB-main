@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DISCOVERKU : WEBGIS KAB KULON PROGO</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <!-- Marker Cluster -->
+  <link rel="stylesheet" href="assets/plugins/leaflet-markercluster/MarkerCluster.css" />
+  <link rel="stylesheet" href="assets/plugins/leaflet-markercluster/MarkerCluster.Default.css" />
+  <!-- Routing -->
+  <link rel="stylesheet" href="assets/plugins/leaflet-routing/leaflet-routing-machine.css" />
+  <!-- Search CSS Library -->
+  <link rel="stylesheet" href="assets/plugins/leaflet-search/leaflet-search.css" />
+  <!-- Geolocation CSS Library for Plugin -->
+  <link rel="stylesheet"
+    href="https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/L.Control.Locate.css" />
+  <!-- Leaflet Mouse Position CSS Library -->
+  <link rel="stylesheet" href="assets/plugins/leaflet-mouseposition/L.Control.MousePosition.css" />
+  <!-- Leaflet Measure CSS Library -->
+  <link rel="stylesheet" href="assets/plugins/leaflet-measure/leaflet-measure.css" />
+  <!-- EasyPrint CSS Library -->
+  <link rel="stylesheet" href="assets/plugins/leaflet-easyprint/easyPrint.css" />
+  <style>
+    #map {
+      height: 97.5vh;
+    }
+
+    .info {
+      padding: 6px 8px;
+      font: 14px/16px Arial, Helvetica, sans-serif;
+      background: rgba(100, 149, 237, 0.8);
+      /* Mengganti warna latar belakang menjadi biru lembut */
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      text-align: center;
+      color: #ffffff;
+      /* Mengganti warna teks menjadi putih untuk kontras yang baik */
+    }
+
+    .info h2 {
+      margin: 0 0 5px;
+    }
+  </style>
+  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+  <!-- Google fonts-->
+  <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i"
+    rel="stylesheet" />
+  <!-- Core theme CSS (includes Bootstrap)-->
+  <link href="css/styles.css" rel="stylesheet" />
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <noscript>
+    <link rel="stylesheet" href="assets/css/noscript.css" />
+  </noscript>
+</head>
+
+<body>
+ <!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <a class="navbar-brand" href="index.html"><i class="fa-regular fa-map"></i>DISCOVERKU</a>
+
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="index.html" target="_blank">HOME <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="info.html" target="_blank">INFO</a>
+      </li>
+      <!-- Tombol Tambah Marker -->
+      <li class="nav-item">
+        <a class="btn btn-success nav-link text-white" href="form_marker.html" target="_blank">
+          Tambahkan Tempat baru
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+
+
+  <!-- Masthead-->
+  <div id="map"></div>
+
+  <!-- Include your GeoJSON data -->
+
+  <script src="./jalan.js"></script>
+  <script src="./datageo.geojson"></script>
+  <script src="./DIY.json"></script>
+  <script src="./admin_ar.geojson"></script>
+  <script src="admin_ln.geojson"></script>
+
+  <!-- Leaflet and Plugins -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="assets/plugins/leaflet-markercluster/leaflet.markercluster.js"></script>
+  <script src="assets/plugins/leaflet-markercluster/leaflet.markercluster-src.js"></script>
+  <script src="assets/plugins/leaflet-routing/leaflet-routing-machine.js"></script>
+  <script src="assets/plugins/leaflet-routing/leaflet-routing-machine.min.js"></script>
+  <script src="assets/plugins/leaflet-search/leaflet-search.js"></script>
+  <script
+    src="https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/L.Control.Locate.min.js"></script>
+  <script src="assets/plugins/leaflet-mouseposition/L.Control.MousePosition.js"></script>
+  <script src="assets/plugins/leaflet-measure/leaflet-measure.js"></script>
+  <script src="assets/plugins/leaflet-easyprint/leaflet.easyPrint.js"></script>
+
+  <script>
+    // Initialize the map
+    var map = L.map("map").setView([-7.794774573933365, 110.16128621110478], 11);
+
+    // Title
+    var title = new L.Control();
+    title.onAdd = function (map) {
+      this._div = L.DomUtil.create("div", "info");
+      this.update();
+      return this._div;
+    };
+    title.update = function () {
+      this._div.innerHTML =
+        "<h3>PETA PARIWISATA KABUPATEN KULON PROGO</h3>MATAKULIAH PEMROGRAMAN SPASIAL : WEB";
+    };
+    title.addTo(map);
+
+    // Basemaps
+    var basemap1 = L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      {
+        maxZoom: 19,
+        attribution:
+          'Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Hans',
+      }
+    ).addTo(map);
+
+    var basemap2 = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+      {
+        attribution:
+          'Tiles &copy; Esri | <a href="DIVSIGUGM" target="_blank">DIVSIG UGM</a>',
+      }
+    );
+
+    var basemap3 = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {
+        attribution:
+          'Tiles &copy; Esri | <a href="Latihan WebGIS" target="_blank">DIVSIG UGM</a>',
+      }
+    );
+
+
+
+
+    // Fungsi untuk memuat dan menambahkan GeoJSON
+    function addGeoJSONLayer(url, style, popupField, layerName) {
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const layer = L.geoJSON(data, {
+            style: style,
+            onEachFeature: function (feature, layer) {
+              if (feature.properties && feature.properties[popupField]) {
+                layer.bindPopup(`<strong>${layerName}:</strong> ${feature.properties[popupField]}`);
+              }
+            }
+          });
+          layer.addTo(map);
+        })
+        .catch(error => console.error(`Error loading ${url}:`, error));
+    }
+
+    // Fungsi untuk menambahkan GeoJSON jalan dengan kategori jalan tertentu
+    addGeoJSONLayer(
+      'data_KP/jalan.geojson',  // Path file GeoJSON
+      function (feature) {
+        // Menentukan warna dan ketebalan berdasarkan jenis jalan (REMARK)
+        let jalanStyle = {
+          color: 'black',  // Default warna hitam
+          weight: 1,       // Default ketebalan tipis
+          opacity: 0.6     // Opasitas agar lebih mudah dilihat
+        };
+
+        // Menetapkan ketebalan dan warna berdasarkan jenis jalan
+        if (feature.properties.REMARK === 'Jalan Arteri') {
+          jalanStyle.color = 'red';  // Jalan Arteri diberi warna merah
+          jalanStyle.weight = 4;     // Jalan Arteri lebih tebal
+        } else if (feature.properties.REMARK === 'Jalan Kolektor') {
+          jalanStyle.color = 'maroon';  // Jalan Kolektor diberi warna 
+          jalanStyle.weight = 3;        // Jalan Kolektor sedikit lebih tipis
+        } else if (feature.properties.REMARK === 'Jalan Utama') {
+          jalanStyle.color = 'blue';  // Jalan Utama diberi warna biru
+          jalanStyle.weight = 2;      // Jalan Utama ketebalan medium
+        }
+
+        return jalanStyle;  // Mengembalikan style jalan sesuai dengan jenisnya
+      },
+      'REMARK',  // Properti yang digunakan untuk filter dan tooltip
+      'Jalan'    // Nama layer
+    );
+
+
+
+    // Fungsi untuk menghasilkan warna berdasarkan nama kecamatan
+    function getColorByDistrict(name) {
+      const colorMap = {
+        'Galur': '#9c27b0',
+        'Lendah': '#e81e63',
+        'Pengasih': '#673ab7',
+        'Sentolo': '#3f51b5',
+        'Kokap': '#2196f3',
+        'Temon': '#8bc34a',
+        'Girimulyo': '#795548',
+        'Samigaluh': '#ffc107',
+        'Panjatan': '#ff5722',
+        'Kalibawang': '#cddc39',
+        'Wates': '#00bcd4',
+        'Nanggulan': '#4caf50'
+      };
+      return colorMap[name] || '#9e9e9e'; // Warna default
+    }
+
+    // Gaya default untuk kecamatan
+    function defaultStyle(feature) {
+      return {
+        color: '#ffffff',  // Tidak ada garis tepi yang terlihat
+        weight: 0,         // Menghilangkan ketebalan garis batas
+        fillOpacity: 0.6,  // Memberikan transparansi pada warna isi kecamatan
+        fillColor: getColorByDistrict(feature.properties.WADMKC), // Warna berdasarkan kecamatan
+      };
+    }
+
+    // Fungsi untuk menambahkan layer GeoJSON batas kecamatan
+    addGeoJSONLayer(
+      'data_KP/batas_kecamatan.geojson',  // Path file GeoJSON batas kecamatan
+      defaultStyle,                       // Menggunakan style yang telah didefinisikan
+      'WADMKC',                           // Properti yang digunakan untuk mengelompokkan kecamatan
+      'Batas Kecamatan'                   // Nama layer
+    );
+
+
+    // Gaya saat hover
+    function highlightStyle(feature) {
+      return {
+        color: '#FFFF00', // Garis tepi kuning
+        weight: 2,
+        fillOpacity: 0.9, // Transparansi lebih terang
+        fillColor: getColorByDistrict(feature.properties.WADMKC), // Tetap gunakan warna asli
+      };
+    }
+
+    // Tambahkan GeoJSON dengan tooltip dan interaktivitas
+    fetch('data_KP/admin_ar.geojson')
+      .then(response => response.json())
+      .then(data => {
+        const geoLayer = L.geoJSON(data, {
+          style: defaultStyle,
+          onEachFeature: function (feature, layer) {
+            // Tambahkan tooltip yang akan muncul saat hover
+            layer.bindTooltip(
+              `Kecamatan: ${feature.properties.WADMKC}`, // Isi tooltip dengan nama kecamatan
+              { permanent: false, sticky: true } // Tooltip akan menempel saat hover
+            );
+
+            // Event saat mouse hover (mouseover)
+            layer.on('mouseover', function (e) {
+              geoLayer.eachLayer(function (layerItem) {
+                if (layerItem.feature.properties.WADMKC === feature.properties.WADMKC) {
+                  layerItem.setStyle(highlightStyle(layerItem.feature)); // Terapkan gaya highlight
+                }
+              });
+            });
+
+            // Event saat mouse keluar (mouseout)
+            layer.on('mouseout', function (e) {
+              geoLayer.eachLayer(function (layerItem) {
+                if (layerItem.feature.properties.WADMKC === feature.properties.WADMKC) {
+                  layerItem.setStyle(defaultStyle(layerItem.feature)); // Kembalikan ke gaya default
+                }
+              });
+            });
+
+            // Event klik (opsional, jika ingin aksi tambahan saat diklik)
+            layer.on('click', function (e) {
+              alert('Anda mengklik kecamatan: ' + feature.properties.WADMKC);
+            });
+          },
+        }).addTo(map);
+      })
+      .catch(error => console.error('Error loading GeoJSON:', error));
+
+
+    // Data Marker untuk wilayah Kulon Progo
+    var markerData = [
+      [-7.911483158949521, 110.06484833708399, "Pantai Glagah", "assets/css/IMAGE/Glagah.jpg"],
+      [-7.819732826812293, 110.12125602224128, "Waduk Sermo", "assets/css/IMAGE/WadukSermo.jpg"],
+      [-7.866209897987584, 110.16952284192352, "Ayam Goren Bu Hartin", "assets/css/IMAGE/Ayam Goreng Bu Hartin.jpg"],
+      [-7.858720111445577, 110.14939078002678, "Dapur Semar", "assets/css/IMAGE/Dapur Semar.jpg"],
+      [-7.745528420887003, 110.20605941071221, "Geblek Pari", "assets/css/IMAGE/Geblek Pari.jpg"],
+      [-7.886997773361795, 110.18676695489306, "Goa Kebon", "assets/css/IMAGE/Goa Kebon.jpg"],
+      [-7.746966204951053, 110.13143976653308, "Goa Kiskendo", "assets/css/IMAGE/Goa Kiskendo.jpg"],
+      [-7.806966852081933, 110.12922661725564, "Kalibiru", "assets/css/IMAGE/KaliBiru.jpg"],
+      [-7.646212605177133, 110.14390228608647, "Kebun Teh Nglinggo", "assets/css/IMAGE/Kebun Teh Nglinggo.jpg"],
+      [-7.769817406899608, 110.1211136107125, "Kedung Pedut", "assets/css/IMAGE/kedung-pedhutsmalljpg.jpg"],
+      [-7.766286896739272, 110.11756149536915, "Air Terjun Kembang Soka", "assets/css/IMAGE/Kembang Soka.jpg"],
+      [-7.86014301180851, 110.17421842605685, "Mie Ayam Pakde Wonogiri", "assets/css/IMAGE/Mie Ayam Pakde Wonogiri.jpg"],
+      [-7.857776289817122, 110.14871582605696, "Pondok Makan Omah Mbeiji", "assets/ss/IMAGE/Pondok Makan Omah Mbeji.jpg"],
+      [-7.644873522938979, 110.1458731316073, "Tumpeng Menoreh", "assets/css/IMAGE/Tumpeng Menoreh.jpg"],
+      [-7.903330389046623, 110.05791265107344, "Yogyakarta International Airport", "assets/css/IMAGE/YIA.jpeg"],
+    ];
+
+    // Buat grup untuk marker cluster
+    var markers = L.markerClusterGroup();
+
+    // Loop untuk menambahkan marker
+    for (var i = 0; i < markerData.length; i++) {
+      var data = markerData[i];
+      var lat = data[0];
+      var lng = data[1];
+      var title = data[2];
+      var img = data[3] ? `<br><img src="${data[3]}" alt="${title}" style="width:100px;">` : "";
+
+      // Buat marker
+      var marker = L.marker(new L.LatLng(lat, lng), { title: title });
+
+      // Tambahkan popup
+      marker.bindPopup(`<strong>${title}</strong>${img}`);
+
+      // Tambahkan marker ke grup
+      markers.addLayer(marker);
+    }
+
+    // Tambahkan grup marker ke peta
+    map.addLayer(markers);
+    
+    
+
+    // Fungsi untuk menambahkan legenda
+    const legend = L.control({ position: 'bottomleft' });
+
+    legend.onAdd = function () {
+      // Buat elemen div untuk legenda dengan kotak sebagai latar belakang
+      const div = L.DomUtil.create('div', 'legend');
+      div.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';  // Transparan putih sebagai latar belakang
+      div.style.padding = '10px';
+      div.style.borderRadius = '5px';
+      div.style.border = '1px solid #ccc';
+
+      // Tambahkan konten HTML ke dalam legenda
+      div.innerHTML = `
+    <h2 style="margin-bottom: 5px;">Legenda</h2>
+    <div><i style="width: 15px; height: 15px; background-image: url('https://unpkg.com/leaflet/dist/images/marker-icon.png'); background-size: contain; display: inline-block; margin-right: 2px;"></i> Tempat Tujuan</div> <!-- Marker Default -->
+    <div><i style="width: 30px; height: 2px; background: red; display: inline-block; margin-right: 5px;"></i> Jalan Arteri </div> <!-- Garis untuk Jalan -->
+    <div><i style="width: 30px; height: 2px; background: maroon; display: inline-block; margin-right: 5px;"></i> Jalan Kolektor</div> <!-- Garis untuk Jalan -->
+    <div><i style="width: 30px; height: 2px; background: black; display: inline-block; margin-right: 5px;"></i> Jalan Utama</div> <!-- Garis untuk Jalan -->
+    <div><i style="background: #9c27b0; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Galur</div>
+    <div><i style="background: #e81e63; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Lendah</div>
+    <div><i style="background: #673ab7; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Pengasih</div>
+    <div><i style="background: #3f51b5; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Sentolo</div>
+    <div><i style="background: #2196f3; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Kokap</div>
+    <div><i style="background: #8bc34a; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Temon</div>
+    <div><i style="background: #795548; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Girimulyo</div>
+    <div><i style="background: #ffc107; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Samigaluh</div>
+    <div><i style="background: #ff5722; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Panjatan</div>
+    <div><i style="background: #cddc39; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Kalibawang</div>
+    <div><i style="background: #00bcd4; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Wates</div>
+    <div><i style="background: #4caf50; width: 15px; height: 15px; display: inline-block; margin-right: 5px;"></i> Nanggulan</div>
+  `;
+
+      return div;
+    };
+
+    // Tambahkan legenda ke peta
+    legend.addTo(map);
+
+    // Plugin Geolocation - Menampilkan lokasi pengguna
+    var locateControl = L.control
+      .locate({
+        position: "topleft",
+        drawCircle: true, // Menampilkan lingkaran radius
+        follow: true, // Ikuti lokasi pengguna
+        setView: true, // Menyusun peta agar berfokus pada pengguna
+        keepCurrentZoomLevel: false,
+        markerStyle: {
+          weight: 1,
+          opacity: 0.8,
+          fillOpacity: 0.8,
+        },
+        circleStyle: {
+          weight: 1,
+          clickable: false,
+        },
+        icon: "fas fa-crosshairs", // Ikon untuk geolokasi
+        metric: true,
+        strings: {
+          title: "Click to find your location", // Judul saat klik
+          popup: "You are here. Accuracy: {distance} {unit}", // Popup saat lokasi ditemukan
+          outsideMapBoundsMsg: "Location not available", // Pesan jika berada di luar peta
+        },
+        locateOptions: {
+          maxZoom: 16, // Zoom maksimal saat lokasi ditemukan
+          watch: true,
+          enableHighAccuracy: true,
+          maximumAge: 10000,
+          timeout: 10000,
+        },
+      })
+      .addTo(map); // Menambahkan kontrol geolokasi ke peta
+
+    // Plugin Mouse Position - Menampilkan koordinat saat mouse berada di peta
+    L.control
+      .mousePosition({
+        position: "bottomright",
+        separator: ",",
+        prefix: "Point Coordinates: ", // Teks prefix untuk koordinat
+      })
+      .addTo(map); // Menambahkan kontrol posisi mouse ke peta
+
+
+    // // Plugin Measurement Tool
+    // var measureControl = new L.Control.Measure({
+    //   position: "topleft",
+    //   primaryLengthUnit: "meters",
+    //   secondaryLengthUnit: "kilometers",
+    //   primaryAreaUnit: "hectares",
+    //   secondaryAreaUnit: "sqmeters",
+    //   activeColor: "#FF0000",
+    //   completedColor: "#00FF00",
+    // });
+
+    // measureControl.addTo(map);
+
+    // // Plugin EasyPrint
+    // L.easyPrint({
+    //   title: "Print",
+    // }).addTo(map);
+
+    // Plugin Routing
+    L.Routing.control({
+      waypoints: [
+        L.latLng(-7.903330389046623, 110.05791265107344),
+        L.latLng(-7.819732826812293, 110.12125602224128),
+      ],
+      routeWhileDragging: true,
+    }).addTo(map);
+
+
+  </script>
+</body>
+
+</html>

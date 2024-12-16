@@ -1,0 +1,41 @@
+/* Carousel Styles */
+.carousel {
+    overflow: hidden; /* Sembunyikan konten yang melampaui batas */
+    margin: 0 auto; /* Menjaga agar carousel terpusat */
+    max-width: 100%; /* Pastikan tidak melebihi lebar layar */
+  }
+  
+  .reel {
+    display: flex;
+    gap: 20px; /* Menambahkan ruang antar gambar */
+    overflow-x: scroll; /* Membuat reel dapat digulung secara horizontal */
+    scroll-snap-type: x mandatory; /* Mengaktifkan pemilihan otomatis gambar saat digulir */
+    -webkit-overflow-scrolling: touch; /* Memperbaiki scroll di perangkat mobile */
+  }
+  
+  .reel article {
+    min-width: 300px; /* Lebar setiap artikel tetap */
+    max-width: 300px; /* Menjaga agar artikel tidak lebih lebar */
+    flex-shrink: 0; /* Menjaga agar artikel tidak menyusut */
+    scroll-snap-align: start; /* Memastikan gambar berhenti pada posisi yang tepat */
+    text-align: center;
+  }
+  
+  .reel .image img {
+    width: 100%;
+    height: 208px; /* Ukuran tinggi yang konsisten */
+    object-fit: cover; /* Menjaga gambar agar tidak terdistorsi */
+    border-radius: 8px; /* Sudut melengkung pada gambar */
+  }
+  
+  .reel header h3 a {
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .reel p {
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
