@@ -23,6 +23,6 @@ terlupakan. DISCOVERKU merupakan WEBGIS yang memuat tentang info mengenai tempat
 </ul>
 
 <h2>Tangkapan layar komponen penting produk:</h2>
-![Uploading PGWEB_Hans Sama.jpg…]()
+![PGWEB_Hans Sama](https://github.com/user-attachments/assets/9a7c3fae-a0fa-426c-9039-2ee5847e19f5)
 
 link demo : "https://discoverku.netlify.app/"
